@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'flash-sales-api'
+    metrics_path: '/metrics'  # Altere para a rota de métricas se for diferente no código
+    static_configs:
+      - targets: ['api:3000']

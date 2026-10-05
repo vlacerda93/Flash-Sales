@@ -1,0 +1,61 @@
+  version: '3.8'
+
+  services:
+    # 1. Banco de Dados Relacional
+    postgres:
+      image: postgres:15-alpine
+      container_name: flash_sales_db
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgrespassword
+        POSTGRES_DB: flash_sales
+      ports:
+        - "5432:5432"
+      volumes:
+        - pgdata:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+    # 2. Cache / Fila em Memória
+    redis:
+      image: redis:7-alpine
+      container_name: flash_sales_redis
+      ports:
+        - "6379:6379"
+
+    # 3. Aplicação Node.js (API)
+    api:
+      build: .
+      container_name: flash_sales_api
+      ports:
+        - "3000:3000"
+      environment:
+        NODE_ENV: production
+        PORT: 3000
+        DB_HOST: postgres
+        DB_PORT: 5432
+        DB_USER: postgres
+        DB_PASSWORD: postgrespassword
+        DB_NAME: flash_sales
+        REDIS_HOST: redis
+        REDIS_PORT: 6379 
+      depends_on:
+        postgres:
+          condition: service_healthy
+        redis:
+          condition: service_started
+
+    # 4. Monitoramento / Coleta de Métricas
+    prometheus:
+      image: prom/prometheus:latest
+      container_name: flash_sales_prometheus
+      ports:
+        - "9090:9090"
+      volumes:
+        - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  volumes:
+    pgdata:

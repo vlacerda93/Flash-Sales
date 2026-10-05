@@ -1,0 +1,19 @@
+# Dependências
+node_modules/
+
+# Build do TypeScript
+dist/
+build/
+
+# Variáveis de ambiente
+.env
+.env.local
+
+# Logs e temporários
+*.log
+logs/
+.DS_Store
+.vscode/
+
+# Cobertura de testes
+coverage/
